@@ -54,7 +54,8 @@ NWP_VARIABLES = [
 
 NWP_START = "2018-01-01"
 NWP_END = "2020-12-31"
-NWP_ARCHIVE_URL = "https://archive-api.open-meteo.com/v1/archive"
+NWP_ARCHIVE_URL = "https://customer-archive-api.open-meteo.com/v1/archive"
+NWP_API_KEY = os.environ.get("OPEN_METEO_API_KEY", "")
 NWP_CHECKPOINT_EVERY = 100
 NWP_SLEEP_BETWEEN_CALLS = 0.5
 NWP_RETRY_RATE_LIMIT_SLEEP = 120
@@ -632,6 +633,8 @@ def _fetch_nwp_for_location(
         "end_date": NWP_END,
         "hourly": NWP_VARIABLES,
     }
+    if NWP_API_KEY:
+        params["apikey"] = NWP_API_KEY
 
     while True:
         try:
