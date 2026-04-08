@@ -247,17 +247,25 @@ def _compute_solar_elevation_map(
 def _clean_month_step1(
     df: pd.DataFrame,
     bad_data: pd.DataFrame,
-) -> tuple[pd.DataFrame, int]:
-    """Apply cleaning step 1 (bad_data filtering) to a single month.
+) -> tuple[pd.DataFrame, int, int]:
+    """Apply cleaning step 1 to a single month.
+
+    Steps:
+        1a. Remove rows in bad_data periods.
+        1b. Remove rows with NaN generation_Wh.
 
     Args:
         df: Raw monthly PV DataFrame with pv_id, timestamp, generation_Wh.
         bad_data: Bad-period DataFrame.
 
     Returns:
-        Tuple of (cleaned DataFrame, number of rows removed).
+        Tuple of (cleaned DataFrame, bad_data rows removed, NaN rows removed).
     """
-    return _apply_bad_data_mask(df, bad_data)
+    df, n_bad = _apply_bad_data_mask(df, bad_data)
+    n_nan = int(df["generation_Wh"].isna().sum())
+    if n_nan > 0:
+        df = df.dropna(subset=["generation_Wh"])
+    return df, n_bad, n_nan
 
 
 def step3_download_pv_training(
@@ -294,6 +302,7 @@ def step3_download_pv_training(
 
     rows_removed: dict[str, int] = {
         "bad_data_periods": 0,
+        "nan_generation": 0,
         "negative_generation": 0,
         "exceeds_capacity": 0,
     }
@@ -318,15 +327,16 @@ def step3_download_pv_training(
                     f"Columns present: {list(raw.columns)}"
                 )
 
-            cleaned, n_bad = _clean_month_step1(raw, bad_data)
+            cleaned, n_bad, n_nan = _clean_month_step1(raw, bad_data)
             rows_removed["bad_data_periods"] += n_bad
+            rows_removed["nan_generation"] += n_nan
 
             tmp_path = os.path.join(tmp_dir, f"pv_{year}_{month:02d}_clean.parquet")
             cleaned.to_parquet(tmp_path, index=False)
             tmp_files.append(tmp_path)
             print(
                 f"  {year}-{month:02d}: {len(raw):,} raw -> {len(cleaned):,} clean "
-                f"(removed bad={n_bad:,})"
+                f"(removed bad={n_bad:,}, nan={n_nan:,})"
             )
 
     # --- Load all monthly chunks for steps 2-5 ---
