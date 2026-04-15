@@ -31,7 +31,7 @@ except Exception:
     )
 
 
-def run_eval(testset_path: str = "dataset/testset.csv"):
+def run_eval(testset_path: str = "dataset/testset.csv", model_path: str = None):
     # load testset from csv
     testset = pd.read_csv(testset_path)
 
@@ -46,7 +46,7 @@ def run_eval(testset_path: str = "dataset/testset.csv"):
     nwp_df = get_nwp(pv_metadata)
 
     # Run forecast with PV and NWP inputs.
-    predictions_df = run_forecast(pv_df=pv_metadata, nwp_df=nwp_df)
+    predictions_df = run_forecast(pv_df=pv_metadata, nwp_df=nwp_df, model_path=model_path)
 
     # Combine the forecast results with the ground truth
     # (ts, id, horizon (in hours), pred, truth, diff)
@@ -61,6 +61,8 @@ def run_eval(testset_path: str = "dataset/testset.csv"):
 
     # Visualizations
     # TODO
+
+    return results_df
 
 
 # run_eval()

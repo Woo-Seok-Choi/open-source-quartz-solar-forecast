@@ -11,7 +11,9 @@ from quartz_solar_forecast.pydantic_models import PVSite
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
-def run_forecast(pv_df: pd.DataFrame, nwp_df: pd.DataFrame, nwp_source="ICON") -> pd.DataFrame:
+def run_forecast(
+    pv_df: pd.DataFrame, nwp_df: pd.DataFrame, nwp_source="ICON", model_path: str = None
+) -> pd.DataFrame:
     """
     Run the forecast from NWP data
 
@@ -30,7 +32,9 @@ def run_forecast(pv_df: pd.DataFrame, nwp_df: pd.DataFrame, nwp_source="ICON") -
     """
 
     # load model only once
-    model = load_model(f"{dir_path}/../models/model-0.3.0.pkl")
+    if model_path is None:
+        model_path = f"{dir_path}/../models/model-0.3.0.pkl"
+    model = load_model(model_path)
 
     all_predictions = []
     for i in range(len(pv_df)):
