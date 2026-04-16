@@ -31,7 +31,7 @@ except Exception:
     )
 
 
-def run_eval(testset_path: str = "dataset/testset.csv", model_path: str = None):
+def run_eval(testset_path: str = "dataset/testset.csv", model_path: str = None, output_path: str = "results.csv"):
     # load testset from csv
     testset = pd.read_csv(testset_path)
 
@@ -53,7 +53,8 @@ def run_eval(testset_path: str = "dataset/testset.csv", model_path: str = None):
     results_df = combine_forecast_ground_truth(predictions_df, ground_truth_df)
 
     # Save file
-    results_df.to_csv("results.csv")
+    os.makedirs(os.path.dirname(output_path), exist_ok=True) if os.path.dirname(output_path) else None
+    results_df.to_csv(output_path)
 
     # Calculate and print metrics: MAE
     metrics(results_df, pv_metadata, include_night=True)

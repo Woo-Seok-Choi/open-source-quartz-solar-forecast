@@ -22,8 +22,12 @@ if __name__ == '__main__':
         "v1-tilt (model-0.4.0)": os.path.join(models_dir, "model-0.4.0.pkl"),
     }
 
+    results_dir = os.path.join(base_dir, "results")
+
     for name, path in models.items():
         print(f"\n{'='*60}")
         print(f"Evaluating: {name}")
         print(f"{'='*60}\n")
-        run_eval(testset_path=testset_path, model_path=path)
+        model_name = os.path.splitext(os.path.basename(path))[0]
+        output_path = os.path.join(results_dir, f"{model_name}.csv")
+        run_eval(testset_path=testset_path, model_path=path, output_path=output_path)
