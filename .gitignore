@@ -11,3 +11,7 @@ frontend/.vite
 __pycache__/
 .cache.sqlite
 *.egg-info
+CLAUDE.md
+data/
+results.csv
+.cache_openmeteo_archive.sqlite

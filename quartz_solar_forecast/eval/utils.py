@@ -40,6 +40,12 @@ def combine_forecast_ground_truth(
     forecast_df["pv_id"] = forecast_df["pv_id"].astype(int)
     ground_truth_df["pv_id"] = ground_truth_df["pv_id"].astype(int)
 
+    # ensure consistent timezone for merge
+    if forecast_df["timestamp"].dt.tz is None:
+        forecast_df["timestamp"] = forecast_df["timestamp"].dt.tz_localize("UTC")
+    if ground_truth_df["timestamp"].dt.tz is None:
+        ground_truth_df["timestamp"] = ground_truth_df["timestamp"].dt.tz_localize("UTC")
+
     # merge the two dataframes
     combined_df = pd.merge(forecast_df, ground_truth_df, on=["timestamp", "pv_id", "horizon_hour"])
 
