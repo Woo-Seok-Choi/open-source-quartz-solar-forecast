@@ -66,4 +66,45 @@ def run_eval(testset_path: str = "dataset/testset.csv", model_path: str = None, 
     return results_df
 
 
+def run_eval_nwp_transformer(
+    testset_path: str = "dataset/testset.csv",
+    model_path: str = None,
+    output_path: str = "results.csv",
+):
+    """Run evaluation for the ``nwp_transformer`` model.
+
+    This is a parallel entry point to :func:`run_eval`; the v1/v2
+    pipeline is unchanged. The differences are the NWP source
+    (Open-Meteo Archive 14-var to match training distribution) and the
+    forecast adapter (``run_forecast_nwp_transformer``).
+    """
+    if model_path is None:
+        raise ValueError(
+            "run_eval_nwp_transformer requires model_path to a .pt checkpoint."
+        )
+
+    from quartz_solar_forecast.eval.forecast_nwp_transformer import (
+        run_forecast_nwp_transformer,
+    )
+    from quartz_solar_forecast.eval.nwp_openmeteo import get_nwp_openmeteo
+
+    testset = pd.read_csv(testset_path)
+    pv_metadata = get_pv_metadata(testset)
+    ground_truth_df = get_pv_truth(testset)
+    nwp_df = get_nwp_openmeteo(pv_metadata)
+    predictions_df = run_forecast_nwp_transformer(
+        pv_df=pv_metadata, nwp_df=nwp_df, model_path=model_path,
+    )
+    results_df = combine_forecast_ground_truth(predictions_df, ground_truth_df)
+
+    if os.path.dirname(output_path):
+        os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    results_df.to_csv(output_path)
+
+    metrics(results_df, pv_metadata, include_night=True)
+    metrics(results_df, pv_metadata, include_night=False)
+
+    return results_df
+
+
 # run_eval()

@@ -16,3 +16,5 @@ data/
 results/
 results.csv
 .cache_openmeteo_archive.sqlite
+.cache_openmeteo_eval.sqlite
+runs/
